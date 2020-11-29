@@ -21,6 +21,7 @@ Node *rotateLL(Node **tree, Node **x);
 Node *rotateRR(Node **tree, Node **x);
 Node *rotateLR(Node **tree, Node **x);
 Node *rotateRL(Node **tree, Node **x);
+Node *search(Node *current, int key);
 
 void inorderAVL(Node *node);
 
@@ -120,13 +121,9 @@ void insertAVL(Node **tree, int newKey)
     updateBF(*tree, newNode);
 
     Node *searchNode = searchParent(*tree, parent->key);
-    //inorderAVL(*tree);
-
-    //Node *current = parent;
 
     if (searchNode != NULL)
     {
-        //cout << searchNode->key << " " << searchNode->bf << endl;
         //조상 노드들 중 bf가 1 이상인 것을 찾아내도록 하자.
         bool isRoot = false;
         while (abs(searchNode->bf) <= 1)
@@ -162,7 +159,6 @@ void insertAVL(Node **tree, int newKey)
                     rotateLR(tree, &searchNode);
                     updateBF(*tree, newNode);
                 }
-
             }
             //R
             else
@@ -192,6 +188,73 @@ void insertAVL(Node **tree, int newKey)
     else
     {
         cout << "NO ";
+    }
+}
+
+void deleteAVL(Node **tree, int key)
+{
+    Node *node = search(*tree, key);
+    Node *parent = searchParent(*tree, key);
+
+    //node의 자식이 없을 때
+    if (nullptr == node->left && nullptr == node->right)
+    {
+        if (parent == nullptr)
+        {
+            *tree = nullptr;
+        }
+        else
+        {
+            if (node == parent->left)
+            {
+                parent->left = nullptr;
+            }
+            else
+            {
+                parent->right = nullptr;
+            }
+        }
+        delete node;
+    }
+    //node의 자식이 1개일 때
+    else if (nullptr == node->left || nullptr == node->right)
+    {
+        Node *child = (nullptr != node->left) ? node->left : node->right;
+        if (parent == nullptr)
+        {
+            *tree = child;
+        }
+        else
+        {
+            if (node == parent->left)
+            {
+                parent->left = child;
+            }
+            else
+            {
+                parent->right = child;
+            }
+        }
+    }
+    else
+    {
+        Node *childParent = node;
+        Node *child = node->right;
+        while (nullptr != child->left)
+        {
+            childParent = child;
+            child = child->left;
+        }
+        if (child == childParent->left)
+        {
+            childParent->left = child->right;
+        }
+        else
+        {
+            childParent->right = child->right;
+        }
+        node->key = child->key;
+        delete (child);
     }
 }
 
@@ -282,13 +345,14 @@ Node *rotateLL(Node **tree, Node **near)
     }
     else
     {
-        if(sub->key < parent->key){
+        if (sub->key < parent->key)
+        {
             parent->left = sub;
         }
-        else{
+        else
+        {
             parent->right = sub;
         }
-
     }
 
     return sub;
@@ -322,14 +386,43 @@ Node *rotateRR(Node **tree, Node **near)
     }
     else
     {
-        if(sub->key < parent->key){
+        if (sub->key < parent->key)
+        {
             parent->left = sub;
         }
-        else{
+        else
+        {
             parent->right = sub;
         }
     }
     return sub;
+}
+
+void testDelete()
+{
+    int testcase[] = {15, 14, 13};
+    int deleteOrder[] = {13, 14, 15};
+
+    Node *tree = nullptr;
+
+    for (int i = 0; i < 3; i++)
+    {
+        insertAVL(&tree, testcase[i]);
+        inorderAVL(tree);
+        printf("\n");
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        printf("%d ", deleteOrder[i]);
+        deleteAVL(&tree, deleteOrder[i]);
+        printf(" : ");
+        inorderAVL(tree);
+        printf("\n");
+    }
+
+    bool result = tree == nullptr ? true : false;
+    cout << result << endl;
 }
 
 void testLL()
@@ -343,7 +436,15 @@ void testLL()
         inorderAVL(tree);
         printf("\n");
     }
-    cout << endl;
+
+    for (int i = 0; i < 7; i++)
+    {
+        printf("%d ", testcase[i]);
+        deleteAVL(&tree, testcase[i]);
+        printf(" : ");
+        inorderAVL(tree);
+        printf("\n");
+    }
 }
 
 void testRR()
@@ -357,6 +458,7 @@ void testRR()
         inorderAVL(tree);
         printf("\n");
     }
+
     cout << endl;
 }
 
@@ -402,5 +504,5 @@ void testEntire()
 
 int main()
 {
-    testEntire();
+    testLL();
 }
