@@ -222,9 +222,16 @@ void rotate(Node **tree)
 
     //current를 찾았으면 그것의 부모를 찾는데 부모가 !=nullptr 이어야함
     Node *current = *tree;
-    while (abs(current->bf) != 0)
-    {
+    //while (abs(current->bf) != 0)
+    //{
+    //    current = current->bf > 0 ? current->left : current->right;
+    //}
+
+    while(true){
         current = current->bf > 0 ? current->left : current->right;
+        if(current->left == nullptr && current->right == nullptr){
+            break;
+        }
     }
 
     Node *parent = searchNearestParentNotBalanced(tree, current);
@@ -606,6 +613,7 @@ void testEntire()
         printf("%d ", testcase[i]);
         insertAVL(&tree, testcase[i]);
         inorderAVL(tree);
+        cout << "//// tree :  " << tree->key << endl;
         printf("\n");
     }
     for (int i = 0; i < 20; i++)
@@ -688,5 +696,5 @@ void testcase1()
 
 int main()
 {
-    testcase1();
+    testEntire();
 }
