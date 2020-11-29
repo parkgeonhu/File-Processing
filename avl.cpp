@@ -17,7 +17,11 @@ public:
 };
 
 void updateBF(Node *node, Node *y);
-void rotateLL(Node **tree, Node **x);
+Node *rotateLL(Node **tree, Node **x);
+Node *rotateRR(Node **tree, Node **x);
+Node *rotateLR(Node **tree, Node **x);
+Node *rotateRL(Node **tree, Node **x);
+
 void inorderAVL(Node *node);
 
 int getHeight(Node *node)
@@ -117,11 +121,12 @@ void insertAVL(Node **tree, int newKey)
 
     Node *searchNode = searchParent(*tree, parent->key);
     //inorderAVL(*tree);
+
     //Node *current = parent;
 
     if (searchNode != NULL)
     {
-        //cout<<searchNode->key<<" "<<parent->key<<endl;
+        //cout << searchNode->key << " " << searchNode->bf << endl;
         //조상 노드들 중 bf가 1 이상인 것을 찾아내도록 하자.
         bool isRoot = false;
         while (abs(searchNode->bf) <= 1)
@@ -140,40 +145,59 @@ void insertAVL(Node **tree, int newKey)
             Node *lSubNode = searchNode->left;
             Node *rSubNode = searchNode->right;
 
-            //LL
-            if (newKey < lSubNode->key)
+            //L
+            if (searchNode->bf >= 0)
             {
-                cout << "LL ";
-                rotateLL(tree, &searchNode);
-                updateBF(*tree, newNode);
-            }
-            //RR
-            else if (newKey > rSubNode->key)
-            {
-            }
+                //LL
+                if (newKey < lSubNode->key)
+                {
+                    cout << "LL ";
+                    rotateLL(tree, &searchNode);
+                    updateBF(*tree, newNode);
+                }
+                //LR
+                if (newKey > lSubNode->key)
+                {
+                    cout << "LR ";
+                    rotateLR(tree, &searchNode);
+                    updateBF(*tree, newNode);
+                }
 
-            //LR
-            else if (newKey > lSubNode->key)
-            {
             }
-
-            //RL
-            else if (newKey < rSubNode->key)
+            //R
+            else
             {
+                //RR
+                if (newKey > rSubNode->key)
+                {
+                    cout << "RR ";
+                    rotateRR(tree, &searchNode);
+                    updateBF(*tree, newNode);
+                }
+                //RL
+                else if (newKey < rSubNode->key)
+                {
+                    //inorderAVL(*tree);
+                    cout << "RL ";
+                    rotateRL(tree, &searchNode);
+                    updateBF(*tree, newNode);
+                }
             }
         }
-        else{
+        else
+        {
             cout << "NO ";
         }
     }
-    else{
+    else
+    {
         cout << "NO ";
     }
 }
 
 void updateBF(Node *node, Node *y)
 {
-    if (node == NULL)
+    if (node == NULL || y->key == node->key)
     {
         return;
     }
@@ -243,7 +267,7 @@ Node *search(Node *current, int key)
 // y 삭제, 삽입된 노드
 // x : y랑 가장 가까우면서 unbalance
 // p : x의 부모노드
-void rotateLL(Node **tree, Node **near)
+Node *rotateLL(Node **tree, Node **near)
 {
     Node *parent = searchParent(*tree, (*near)->key);
 
@@ -258,38 +282,73 @@ void rotateLL(Node **tree, Node **near)
     }
     else
     {
-        parent->left = sub;
+        if(sub->key < parent->key){
+            parent->left = sub;
+        }
+        else{
+            parent->right = sub;
+        }
+
     }
 
-    //Node * near = *x;
-    //Node * sub;
-    //p->left=near->left;
-
-    //else{
-    //    sub = x->left;
-    //}
-
-    //Node *temp = sub->right;
-    //p->left = x->left;
-    //p->left->right = x;
-    //x->left = temp;
+    return sub;
 }
 
-void rotateLR(Node **tree, Node *x, Node *p)
+Node *rotateLR(Node **tree, Node **near)
 {
+    Node *sub = (*near)->left;
+    (*near)->left = rotateRR(tree, &sub);
+    return rotateLL(tree, near);
 }
 
-void rotateRL(Node **tree, Node *x, Node *p)
+Node *rotateRL(Node **tree, Node **near)
 {
+    Node *sub = (*near)->right;
+    (*near)->right = rotateLL(tree, &sub);
+    return rotateRR(tree, near);
 }
 
-void rotateRR(Node **tree, Node *x, Node *p)
+Node *rotateRR(Node **tree, Node **near)
 {
+    Node *parent = searchParent(*tree, (*near)->key);
+
+    Node *sub = (*near)->right;
+    (*near)->right = sub->left;
+    sub->left = *near;
+
+    if (parent == NULL)
+    {
+        *tree = sub;
+    }
+    else
+    {
+        if(sub->key < parent->key){
+            parent->left = sub;
+        }
+        else{
+            parent->right = sub;
+        }
+    }
+    return sub;
 }
 
 void testLL()
 {
     int testcase[] = {15, 14, 13, 12, 11, 10, 9};
+    Node *tree = nullptr;
+
+    for (int i = 0; i < 7; i++)
+    {
+        insertAVL(&tree, testcase[i]);
+        inorderAVL(tree);
+        printf("\n");
+    }
+    cout << endl;
+}
+
+void testRR()
+{
+    int testcase[] = {9, 10, 11, 12, 13, 14, 15};
     Node *tree = nullptr;
 
     for (int i = 0; i < 7; i++)
@@ -343,5 +402,5 @@ void testEntire()
 
 int main()
 {
-    testLL();
+    testEntire();
 }
