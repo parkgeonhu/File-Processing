@@ -22,7 +22,8 @@ Node *rotateRR(Node **tree, Node **x);
 Node *rotateLR(Node **tree, Node **x);
 Node *rotateRL(Node **tree, Node **x);
 Node *search(Node *current, int key);
-void rotate(Node **tree);
+void rotate(Node **tree, Node *current, int key, Node *temp);
+Node *deleteBST(Node **tree, int key);
 
 void inorderAVL(Node *node);
 
@@ -94,6 +95,29 @@ Node *searchParent(Node *tree, int key)
 
 int getRotationType() {}
 
+Node *searchNearestParentNotBalanced(Node **tree, Node *node)
+{
+    bool isRoot = false;
+    Node *parent = node;
+    Node *searchNode = searchParent(*tree, parent->key);
+    if (searchNode == nullptr)
+    {
+        return nullptr;
+    }
+    while (abs(searchNode->bf) <= 1)
+    {
+        if (*tree == searchNode)
+        {
+            isRoot = true;
+            break;
+        }
+        //parent 노드의 parent를 구하고
+        parent = searchNode;
+        searchNode = searchParent(*tree, parent->key);
+    }
+    return isRoot ? nullptr : searchNode;
+}
+
 void insertAVL(Node **tree, int newKey)
 {
     Node *newNode = new Node(newKey);
@@ -118,123 +142,81 @@ void insertAVL(Node **tree, int newKey)
     }
 
     updateBF(*tree);
-    rotate(tree);
+    //current는 newNode로 넣어주면 됨
+    rotate(tree, newNode, 0, nullptr);
     updateBF(*tree);
-
-    //Node *searchNode = searchParent(*tree, parent->key);
-
-    //if (searchNode != NULL)
-    //{
-    //    //조상 노드들 중 bf가 1 이상인 것을 찾아내도록 하자.
-    //    bool isRoot = false;
-    //    while (abs(searchNode->bf) <= 1)
-    //    {
-    //        if (*tree == searchNode)
-    //        {
-    //            isRoot = true;
-    //            break;
-    //        }
-    //        //parent 노드의 parent를 구하고
-    //        parent = searchNode;
-    //        searchNode = searchParent(*tree, parent->key);
-    //    }
-    //    if (!isRoot)
-    //    {
-    //        Node *lSubNode = searchNode->left;
-    //        Node *rSubNode = searchNode->right;
-
-    //        //L
-    //        if (searchNode->bf >= 0)
-    //        {
-    //            //LL
-    //            if (newKey < lSubNode->key)
-    //            {
-    //                cout << "LL ";
-    //                rotateLL(tree, &searchNode);
-    //                updateBF(*tree);
-    //            }
-    //            //LR
-    //            if (newKey > lSubNode->key)
-    //            {
-    //                cout << "LR ";
-    //                rotateLR(tree, &searchNode);
-    //                updateBF(*tree);
-    //            }
-    //        }
-    //        //R
-    //        else
-    //        {
-    //            //RR
-    //            if (newKey > rSubNode->key)
-    //            {
-    //                cout << "RR ";
-    //                rotateRR(tree, &searchNode);
-    //                updateBF(*tree);
-    //            }
-    //            //RL
-    //            else if (newKey < rSubNode->key)
-    //            {
-    //                //inorderAVL(*tree);
-    //                cout << "RL ";
-    //                rotateRL(tree, &searchNode);
-    //                updateBF(*tree);
-    //            }
-    //        }
-    //    }
-    //    else
-    //    {
-    //        cout << "NO ";
-    //    }
-    //}
-    //else
-    //{
-    //    cout << "NO ";
-    //}
 }
 
-Node *searchNearestParentNotBalanced(Node **tree, Node *node)
+void deleteAVL(Node **tree, int key)
 {
-    bool isRoot = false;
-    Node *parent = node;
-    Node *searchNode = searchParent(*tree, parent->key);
-    if (searchNode == nullptr)
+    Node *current = deleteBST(tree, key);
+    Node *parent = current;
+    updateBF(*tree);
+    if (abs((*tree)->bf) > 1)
     {
-        return nullptr;
+        current = *tree;
     }
-    while (abs(searchNode->bf) <= 1)
+    bool possibleRotate = false;
+    while (abs(current->bf) > 0)
     {
-        if (*tree == searchNode)
+        if (abs(current->bf) > 1)
         {
-            isRoot = true;
+            parent = current;
+            possibleRotate = true;
+        }
+        current = current->bf > 0 ? current->left : current->right;
+        if (current->left == nullptr && current->right == nullptr)
+        {
+            //cout<<current->key<<endl;
             break;
         }
-        //parent 노드의 parent를 구하고
-        parent = searchNode;
-        searchNode = searchParent(*tree, parent->key);
     }
-    return isRoot ? nullptr : searchNode;
+
+    if (possibleRotate)
+    {
+        cout << " recent : " << current->key << "  parent : " << parent->key;
+        Node * temp = current; 
+        while(temp != nullptr){
+            temp = searchParent(*tree, temp->key);
+            if(abs(current->bf) > 1){
+                break;
+            }
+        }
+        current = temp==nullptr ? current : temp;
+        rotate(tree, current, 1, parent);
+        updateBF(*tree);
+    }
 }
 
-void rotate(Node **tree)
+//current 를 찾아서 넘겨줘야함 current란 near를 찾는데 필요한 노드(최근 추가됐거나, 삭제된 노드의 부모 )다.
+
+// temp = near
+void rotate(Node **tree, Node *current, int key, Node *temp)
 {
 
-    Node *assumeNode;
+    ////current를 찾았으면 그것의 부모를 찾는데 부모가 !=nullptr 이어야함
+    //Node *current = *tree;
+    ////while (abs(current->bf) != 0)
+    ////{
+    ////    current = current->bf > 0 ? current->left : current->right;
+    ////}
 
-    //current를 찾았으면 그것의 부모를 찾는데 부모가 !=nullptr 이어야함
-    Node *current = *tree;
-    //while (abs(current->bf) != 0)
-    //{
+    //while(true){
     //    current = current->bf > 0 ? current->left : current->right;
+    //    if(current->left == nullptr && current->right == nullptr){
+    //        break;
+    //    }
     //}
-
-    while(true){
-        current = current->bf > 0 ? current->left : current->right;
-        if(current->left == nullptr && current->right == nullptr){
-            break;
-        }
+    Node *parent;
+    if (key == 1)
+    {
+        parent = temp;
+    }
+    else
+    {
+        parent = searchNearestParentNotBalanced(tree, current);
     }
 
-    Node *parent = searchNearestParentNotBalanced(tree, current);
     //parent가 nullptr 일 때는 current가 *tree
     if (parent == nullptr)
     {
@@ -287,7 +269,7 @@ void rotate(Node **tree)
     }
 }
 
-void deleteBST(Node **tree, int key)
+Node *deleteBST(Node **tree, int key)
 {
     Node *node = search(*tree, key);
     Node *parent = searchParent(*tree, key);
@@ -310,7 +292,6 @@ void deleteBST(Node **tree, int key)
                 parent->right = nullptr;
             }
         }
-        delete node;
     }
     //node의 자식이 1개일 때
     else if (nullptr == node->left || nullptr == node->right)
@@ -331,38 +312,60 @@ void deleteBST(Node **tree, int key)
                 parent->right = child;
             }
         }
-        delete node;
     }
     else
     {
         Node *childParent = node;
-        Node *child = node->right;
-        while (nullptr != child->left)
+        Node *child = node->left;
+        while (nullptr != child->right)
         {
             childParent = child;
-            child = child->left;
+            child = child->right;
         }
-        if (child == childParent->left)
+        if (child->left != nullptr)
         {
-            childParent->left = child->right;
+            if(childParent->left == child){
+                childParent->left=child->left;
+            }
+            else{
+                childParent->right=child->left;
+            }
         }
         else
         {
-            childParent->right = child->right;
+            if(childParent->left == child){
+                childParent->left = nullptr;
+            }
+            else{
+                childParent->right = nullptr;
+            }
         }
         node->key = child->key;
         node = child;
-        delete (node);
+
+        parent = childParent;
+        
+        cout<<"return parent : "<<parent->key<<endl;
     }
+    delete node;
+    return parent;
 }
 
-void deleteAVL(Node **tree, int key)
-{
-    deleteBST(tree, key);
-    updateBF(*tree);
-    rotate(tree);
-    updateBF(*tree);
-}
+//Node * firstUnbalanceNode(Node * current){
+//    Node * unbalance;
+//    if (current == nullptr)
+//        return nullptr;
+
+//    unbalance = firstUnbalanceNode(current->left);
+//    if(abs(unbalance->bf) > 1){
+
+//    }
+
+//    cout << node->key << " ";
+//    cout << "BF : " << node->bf << ", ";
+
+//    inorderAVL(node->right);
+//}
 
 void updateBF(Node *node)
 {
@@ -622,6 +625,7 @@ void testEntire()
         deleteAVL(&tree, testcase[i]);
         printf(" : ");
         inorderAVL(tree);
+        cout << "//// tree :  " << tree->key << endl;
         printf("\n");
     }
     //​ T = NULL;
@@ -698,3 +702,96 @@ int main()
 {
     testEntire();
 }
+
+//Node *searchNode = searchParent(*tree, parent->key);
+
+//if (searchNode != NULL)
+//{
+//    //조상 노드들 중 bf가 1 이상인 것을 찾아내도록 하자.
+//    bool isRoot = false;
+//    while (abs(searchNode->bf) <= 1)
+//    {
+//        if (*tree == searchNode)
+//        {
+//            isRoot = true;
+//            break;
+//        }
+//        //parent 노드의 parent를 구하고
+//        parent = searchNode;
+//        searchNode = searchParent(*tree, parent->key);
+//    }
+//    if (!isRoot)
+//    {
+//        Node *lSubNode = searchNode->left;
+//        Node *rSubNode = searchNode->right;
+
+//        //L
+//        if (searchNode->bf >= 0)
+//        {
+//            //LL
+//            if (newKey < lSubNode->key)
+//            {
+//                cout << "LL ";
+//                rotateLL(tree, &searchNode);
+//                updateBF(*tree);
+//            }
+//            //LR
+//            if (newKey > lSubNode->key)
+//            {
+//                cout << "LR ";
+//                rotateLR(tree, &searchNode);
+//                updateBF(*tree);
+//            }
+//        }
+//        //R
+//        else
+//        {
+//            //RR
+//            if (newKey > rSubNode->key)
+//            {
+//                cout << "RR ";
+//                rotateRR(tree, &searchNode);
+//                updateBF(*tree);
+//            }
+//            //RL
+//            else if (newKey < rSubNode->key)
+//            {
+//                //inorderAVL(*tree);
+//                cout << "RL ";
+//                rotateRL(tree, &searchNode);
+//                updateBF(*tree);
+//            }
+//        }
+//    }
+//    else
+//    {
+//        cout << "NO ";
+//    }
+//}
+//else
+//{
+//    cout << "NO ";
+//}
+
+// 회전이 불필요하면 nullptr, 필요 가능성이 있으면 ~nullptr
+//Node *needRotate(Node **tree, int key, int type)
+//{
+//    Node *current = NULL;
+//    insertion
+//    if (type == 0)
+//    {
+//        return recent;
+//    }
+//    delete
+//    else
+//    {
+//        Node *recentParent = searchParent(*tree, recent->key);
+//        최근 삭제된 노드가 root라면 회전이 필요없으니
+//        if (recentParent == nullptr)
+//        {
+//            return current;
+//        }
+//        deleteBST()
+//            updateBF()
+//    }
+//}
