@@ -125,6 +125,7 @@ void insertAVL(Node **tree, int newKey)
     if (*tree == nullptr)
     {
         *tree = newNode;
+        cout << "NO";
         return;
     }
 
@@ -150,6 +151,10 @@ void insertAVL(Node **tree, int newKey)
 void deleteAVL(Node **tree, int key)
 {
     Node *current = deleteBST(tree, key);
+    if(*tree == nullptr){
+        cout<<"NO";
+        return;
+    }
     Node *parent = current;
     updateBF(*tree);
     if (abs((*tree)->bf) > 1)
@@ -167,46 +172,24 @@ void deleteAVL(Node **tree, int key)
         current = current->bf > 0 ? current->left : current->right;
         if (current->left == nullptr && current->right == nullptr)
         {
-            //cout<<current->key<<endl;
             break;
         }
     }
 
     if (possibleRotate)
     {
-        cout << " recent : " << current->key << "  parent : " << parent->key;
-        Node * temp = current; 
-        while(temp != nullptr){
-            temp = searchParent(*tree, temp->key);
-            if(abs(current->bf) > 1){
-                break;
-            }
-        }
-        current = temp==nullptr ? current : temp;
         rotate(tree, current, 1, parent);
         updateBF(*tree);
+    }
+    else{
+        cout << "NO";
     }
 }
 
 //current 를 찾아서 넘겨줘야함 current란 near를 찾는데 필요한 노드(최근 추가됐거나, 삭제된 노드의 부모 )다.
-
 // temp = near
 void rotate(Node **tree, Node *current, int key, Node *temp)
 {
-
-    ////current를 찾았으면 그것의 부모를 찾는데 부모가 !=nullptr 이어야함
-    //Node *current = *tree;
-    ////while (abs(current->bf) != 0)
-    ////{
-    ////    current = current->bf > 0 ? current->left : current->right;
-    ////}
-
-    //while(true){
-    //    current = current->bf > 0 ? current->left : current->right;
-    //    if(current->left == nullptr && current->right == nullptr){
-    //        break;
-    //    }
-    //}
     Node *parent;
     if (key == 1)
     {
@@ -220,12 +203,12 @@ void rotate(Node **tree, Node *current, int key, Node *temp)
     //parent가 nullptr 일 때는 current가 *tree
     if (parent == nullptr)
     {
-        cout << "NO ";
+        cout << "NO";
     }
     else
     {
         //current는 최근 추가된 노드
-        cout << "/// present : " << current->key << ", near : " << parent->key << " /// ";
+        //cout << "/// present : " << current->key << ", near : " << parent->key << " /// ";
         Node *lSubNode = parent->left;
         Node *rSubNode = parent->right;
 
@@ -235,14 +218,14 @@ void rotate(Node **tree, Node *current, int key, Node *temp)
             //LL
             if (current->key <= lSubNode->key)
             {
-                cout << "LL ";
+                cout << "LL";
                 rotateLL(tree, &parent);
                 updateBF(*tree);
             }
             //LR
             if (current->key > lSubNode->key)
             {
-                cout << "LR ";
+                cout << "LR";
                 rotateLR(tree, &parent);
                 updateBF(*tree);
             }
@@ -253,7 +236,7 @@ void rotate(Node **tree, Node *current, int key, Node *temp)
             //RR
             if (current->key > rSubNode->key)
             {
-                cout << "RR ";
+                cout << "RR";
                 rotateRR(tree, &parent);
                 updateBF(*tree);
             }
@@ -261,7 +244,7 @@ void rotate(Node **tree, Node *current, int key, Node *temp)
             else if (current->key <= rSubNode->key)
             {
                 //inorderAVL(*tree);
-                cout << "RL ";
+                cout << "RL";
                 rotateRL(tree, &parent);
                 updateBF(*tree);
             }
@@ -344,28 +327,12 @@ Node *deleteBST(Node **tree, int key)
         node = child;
 
         parent = childParent;
-        
-        cout<<"return parent : "<<parent->key<<endl;
     }
     delete node;
     return parent;
 }
 
-//Node * firstUnbalanceNode(Node * current){
-//    Node * unbalance;
-//    if (current == nullptr)
-//        return nullptr;
 
-//    unbalance = firstUnbalanceNode(current->left);
-//    if(abs(unbalance->bf) > 1){
-
-//    }
-
-//    cout << node->key << " ";
-//    cout << "BF : " << node->bf << ", ";
-
-//    inorderAVL(node->right);
-//}
 
 void updateBF(Node *node)
 {
@@ -382,27 +349,8 @@ void updateBF(Node *node)
     int bf = lDepth - rDepth;
     node->bf = bf;
 
-    //cout << node->key << " " << node->bf << endl;
-
-    //if (abs(bf) <= 1)
-    //{
-    //    return;
-    //}
-
     updateBF(left);
     updateBF(right);
-    //if (y->key < left->key)
-    //{
-    //    updateBF(left, y);
-    //}
-    //else if (y->key == node->key)
-    //{
-    //    return;
-    //}
-    //else
-    //{
-    //    updateBF(right, y);
-    //}
 }
 
 void inorderAVL(Node *node)
@@ -413,7 +361,6 @@ void inorderAVL(Node *node)
     inorderAVL(node->left);
 
     cout << node->key << " ";
-    cout << "BF : " << node->bf << ", ";
 
     inorderAVL(node->right);
 }
@@ -503,107 +450,6 @@ Node *rotateRR(Node **tree, Node **near)
     return sub;
 }
 
-void testDelete()
-{
-    int testcase[] = {15, 14, 13};
-    int deleteOrder[] = {14, 13, 15};
-
-    Node *tree = nullptr;
-
-    for (int i = 0; i < 3; i++)
-    {
-        insertAVL(&tree, testcase[i]);
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    Node *temp = searchParent(tree, 14);
-    //Node * temp1=searchParent(tree, temp->key);
-
-    for (int i = 0; i < 3; i++)
-    {
-        printf("%d ", deleteOrder[i]);
-        deleteAVL(&tree, deleteOrder[i]);
-        printf(" : ");
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    bool result = tree == nullptr ? true : false;
-    cout << result << endl;
-}
-
-void testLL()
-{
-    int testcase[] = {15, 14, 13, 12, 11, 10, 9};
-    Node *tree = nullptr;
-
-    for (int i = 0; i < 7; i++)
-    {
-        insertAVL(&tree, testcase[i]);
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    for (int i = 0; i < 7; i++)
-    {
-        printf("%d ", testcase[i]);
-        deleteAVL(&tree, testcase[i]);
-        printf(" : ");
-        inorderAVL(tree);
-        printf("\n");
-    }
-}
-
-void testRR()
-{
-    int testcase[] = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
-    Node *tree = nullptr;
-
-    for (int i = 0; i < 7; i++)
-    {
-        insertAVL(&tree, testcase[i]);
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    for (int i = 6; i >= 0; i--)
-    {
-        printf("%d ", testcase[i]);
-        deleteAVL(&tree, testcase[i]);
-        printf(" : ");
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    cout << endl;
-}
-
-void testLR()
-{
-    int testcase[] = {13, 11, 12};
-    Node *tree = nullptr;
-
-    for (int i = 0; i < 3; i++)
-    {
-        insertAVL(&tree, testcase[i]);
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    Node *temp1 = search(tree, 12);
-
-    for (int i = 2; i >= 0; i--)
-    {
-        printf("%d ", testcase[i]);
-        deleteAVL(&tree, testcase[i]);
-        printf(" : ");
-        inorderAVL(tree);
-        printf("\n");
-    }
-
-    cout << endl;
-}
 
 void testEntire()
 {
@@ -615,87 +461,37 @@ void testEntire()
     {
         printf("%d ", testcase[i]);
         insertAVL(&tree, testcase[i]);
+        cout<<" : ";
         inorderAVL(tree);
-        cout << "//// tree :  " << tree->key << endl;
         printf("\n");
     }
     for (int i = 0; i < 20; i++)
     {
         printf("%d ", testcase[i]);
         deleteAVL(&tree, testcase[i]);
-        printf(" : ");
+        cout<<" : ";
         inorderAVL(tree);
-        cout << "//// tree :  " << tree->key << endl;
         printf("\n");
     }
-    //​ T = NULL;
 
-    //for (int i = 0; i < 20; i++)
-    //{
-    //    printf("%d ", testcase[i]);
-    //    insertAVL(&T, testcase[i]);
-    //    printf(" : ");
-    //    inorderAVL(T);
-    //    printf("\n");
-    //}
-    //for (int i = 19; 0 <= i; i--)
-    //{
-    //    printf("%d ", testcase[i]);
-    //    deleteAVL(&T, testcase[i]);
-    //    printf(" : ");
-    //    inorderAVL(T);
-    //    printf("\n");
-    //}
-}
+    tree = nullptr;
 
-void testcase1()
-{
-    int testcase[] = {40, 11, 77, 33, 20, 90, 99, 70, 88, 80, 66, 10, 22, 30, 44};
-    Node *tree = nullptr;
-
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 20; i++)
     {
         printf("%d ", testcase[i]);
         insertAVL(&tree, testcase[i]);
+        cout<<" : ";
         inorderAVL(tree);
-        cout << "//// tree :  " << tree->key << endl;
         printf("\n");
     }
-
-    Node *temp = search(tree, 20);
-    //Node * temp1=searchParent(tree, temp->key);
-
-    cout << getHeight(temp->right) << endl;
-    cout << temp->right->key << endl;
-    //cout<<tree->right->key<<endl;
-
-    //for (int i = 0; i < 20; i++)
-    //{
-    //    printf("%d ", testcase[i]);
-    //    deleteAVL(&tree, testcase[i]);
-    //    printf(" : ");
-    //    inorderAVL(tree);
-    //    printf("\n");
-    //}
-
-    //​ T = NULL;
-
-    //for (int i = 0; i < 20; i++)
-    //{
-    //    printf("%d ", testcase[i]);
-    //    insertAVL(&T, testcase[i]);
-    //    printf(" : ");
-    //    inorderAVL(T);
-    //    printf("\n");
-    //}
-    //for (int i = 19; 0 <= i; i--)
-    //{
-    //    printf("%d ", testcase[i]);
-    //    deleteAVL(&T, testcase[i]);
-    //    printf(" : ");
-    //    inorderAVL(T);
-    //    printf("\n");
-    //}
+    for (int i = 19; i >= 0; i--)
+    {
+        printf("%d ", testcase[i]);
+        deleteAVL(&tree, testcase[i]);
+        cout<<" : ";
+        inorderAVL(tree);
+        printf("\n");
+    }
 }
 
 int main()
@@ -703,95 +499,160 @@ int main()
     testEntire();
 }
 
-//Node *searchNode = searchParent(*tree, parent->key);
 
-//if (searchNode != NULL)
-//{
-//    //조상 노드들 중 bf가 1 이상인 것을 찾아내도록 하자.
-//    bool isRoot = false;
-//    while (abs(searchNode->bf) <= 1)
-//    {
-//        if (*tree == searchNode)
-//        {
-//            isRoot = true;
-//            break;
-//        }
-//        //parent 노드의 parent를 구하고
-//        parent = searchNode;
-//        searchNode = searchParent(*tree, parent->key);
-//    }
-//    if (!isRoot)
-//    {
-//        Node *lSubNode = searchNode->left;
-//        Node *rSubNode = searchNode->right;
 
-//        //L
-//        if (searchNode->bf >= 0)
-//        {
-//            //LL
-//            if (newKey < lSubNode->key)
-//            {
-//                cout << "LL ";
-//                rotateLL(tree, &searchNode);
-//                updateBF(*tree);
-//            }
-//            //LR
-//            if (newKey > lSubNode->key)
-//            {
-//                cout << "LR ";
-//                rotateLR(tree, &searchNode);
-//                updateBF(*tree);
-//            }
-//        }
-//        //R
-//        else
-//        {
-//            //RR
-//            if (newKey > rSubNode->key)
-//            {
-//                cout << "RR ";
-//                rotateRR(tree, &searchNode);
-//                updateBF(*tree);
-//            }
-//            //RL
-//            else if (newKey < rSubNode->key)
-//            {
-//                //inorderAVL(*tree);
-//                cout << "RL ";
-//                rotateRL(tree, &searchNode);
-//                updateBF(*tree);
-//            }
-//        }
-//    }
-//    else
-//    {
-//        cout << "NO ";
-//    }
-//}
-//else
+
+//void testcase1()
 //{
-//    cout << "NO ";
+//    int testcase[] = {40, 11, 77, 33, 20, 90, 99, 70, 88, 80, 66, 10, 22, 30, 44};
+//    Node *tree = nullptr;
+
+//    for (int i = 0; i < 15; i++)
+//    {
+//        printf("%d ", testcase[i]);
+//        insertAVL(&tree, testcase[i]);
+//        inorderAVL(tree);
+//        cout << "//// tree :  " << tree->key << endl;
+//        printf("\n");
+//    }
+
+//    Node *temp = search(tree, 20);
+//    //Node * temp1=searchParent(tree, temp->key);
+
+//    cout << getHeight(temp->right) << endl;
+//    cout << temp->right->key << endl;
+//    //cout<<tree->right->key<<endl;
+
+//    //for (int i = 0; i < 20; i++)
+//    //{
+//    //    printf("%d ", testcase[i]);
+//    //    deleteAVL(&tree, testcase[i]);
+//    //    printf(" : ");
+//    //    inorderAVL(tree);
+//    //    printf("\n");
+//    //}
+
+//    //​ T = NULL;
+
+//    //for (int i = 0; i < 20; i++)
+//    //{
+//    //    printf("%d ", testcase[i]);
+//    //    insertAVL(&T, testcase[i]);
+//    //    printf(" : ");
+//    //    inorderAVL(T);
+//    //    printf("\n");
+//    //}
+//    //for (int i = 19; 0 <= i; i--)
+//    //{
+//    //    printf("%d ", testcase[i]);
+//    //    deleteAVL(&T, testcase[i]);
+//    //    printf(" : ");
+//    //    inorderAVL(T);
+//    //    printf("\n");
+//    //}
 //}
 
-// 회전이 불필요하면 nullptr, 필요 가능성이 있으면 ~nullptr
-//Node *needRotate(Node **tree, int key, int type)
+
+
+
+//void testDelete()
 //{
-//    Node *current = NULL;
-//    insertion
-//    if (type == 0)
+//    int testcase[] = {15, 14, 13};
+//    int deleteOrder[] = {14, 13, 15};
+
+//    Node *tree = nullptr;
+
+//    for (int i = 0; i < 3; i++)
 //    {
-//        return recent;
+//        insertAVL(&tree, testcase[i]);
+//        inorderAVL(tree);
+//        printf("\n");
 //    }
-//    delete
-//    else
+
+//    Node *temp = searchParent(tree, 14);
+//    //Node * temp1=searchParent(tree, temp->key);
+
+//    for (int i = 0; i < 3; i++)
 //    {
-//        Node *recentParent = searchParent(*tree, recent->key);
-//        최근 삭제된 노드가 root라면 회전이 필요없으니
-//        if (recentParent == nullptr)
-//        {
-//            return current;
-//        }
-//        deleteBST()
-//            updateBF()
+//        printf("%d ", deleteOrder[i]);
+//        deleteAVL(&tree, deleteOrder[i]);
+//        printf(" : ");
+//        inorderAVL(tree);
+//        printf("\n");
 //    }
+
+//    bool result = tree == nullptr ? true : false;
+//    cout << result << endl;
+//}
+
+//void testLL()
+//{
+//    int testcase[] = {15, 14, 13, 12, 11, 10, 9};
+//    Node *tree = nullptr;
+
+//    for (int i = 0; i < 7; i++)
+//    {
+//        insertAVL(&tree, testcase[i]);
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+
+//    for (int i = 0; i < 7; i++)
+//    {
+//        printf("%d ", testcase[i]);
+//        deleteAVL(&tree, testcase[i]);
+//        printf(" : ");
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+//}
+
+//void testRR()
+//{
+//    int testcase[] = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+//    Node *tree = nullptr;
+
+//    for (int i = 0; i < 7; i++)
+//    {
+//        insertAVL(&tree, testcase[i]);
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+
+//    for (int i = 6; i >= 0; i--)
+//    {
+//        printf("%d ", testcase[i]);
+//        deleteAVL(&tree, testcase[i]);
+//        printf(" : ");
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+
+//    cout << endl;
+//}
+
+//void testLR()
+//{
+//    int testcase[] = {13, 11, 12};
+//    Node *tree = nullptr;
+
+//    for (int i = 0; i < 3; i++)
+//    {
+//        insertAVL(&tree, testcase[i]);
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+
+//    Node *temp1 = search(tree, 12);
+
+//    for (int i = 2; i >= 0; i--)
+//    {
+//        printf("%d ", testcase[i]);
+//        deleteAVL(&tree, testcase[i]);
+//        printf(" : ");
+//        inorderAVL(tree);
+//        printf("\n");
+//    }
+
+//    cout << endl;
 //}
