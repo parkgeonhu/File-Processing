@@ -1,0 +1,11 @@
+name: C++ build
+on: [push]
+
+jobs:
+  build:
+    name: TEST & BUILD
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo the greeting's time
+      - run: g++ avl.cpp -o avl
+      - run: .\avl
