@@ -22,7 +22,7 @@ Node *rotateRR(Node **tree, Node **x);
 Node *rotateLR(Node **tree, Node **x);
 Node *rotateRL(Node **tree, Node **x);
 Node *search(Node *current, int key);
-void rotate(Node **tree, Node *current, int key, Node *temp);
+void rotate(Node **tree, Node *current, Node *near=nullptr, int type=0);
 Node *deleteBST(Node **tree, int key);
 
 void inorderAVL(Node *node);
@@ -93,8 +93,6 @@ Node *searchParent(Node *tree, int key)
     return parent;
 }
 
-int getRotationType() {}
-
 Node *searchNearestParentNotBalanced(Node **tree, Node *node)
 {
     bool isRoot = false;
@@ -143,8 +141,9 @@ void insertAVL(Node **tree, int newKey)
     }
 
     updateBF(*tree);
-    //current는 newNode로 넣어주면 됨
-    rotate(tree, newNode, 0, nullptr);
+
+    //newNode를 넘겨주면 searchNearestParentNotBalanced 로 진행됨
+    rotate(tree, newNode);
     updateBF(*tree);
 }
 
@@ -178,7 +177,7 @@ void deleteAVL(Node **tree, int key)
 
     if (possibleRotate)
     {
-        rotate(tree, current, 1, parent);
+        rotate(tree, current, parent, 1);
         updateBF(*tree);
     }
     else{
@@ -186,14 +185,18 @@ void deleteAVL(Node **tree, int key)
     }
 }
 
-//current 를 찾아서 넘겨줘야함 current란 near를 찾는데 필요한 노드(최근 추가됐거나, 삭제된 노드의 부모 )다.
-// temp = near
-void rotate(Node **tree, Node *current, int key, Node *temp)
+
+// 삽입의 경우 type 0
+// 삭제의 경우 type 1
+// current란 near를 찾는데 필요한 노드(삽입의 경우 최근 추가됐거나 / 삭제의 경우 삭제된 노드'의' 부모)다.
+void rotate(Node **tree, Node *current, Node * near, int type)
 {
-    Node *parent;
-    if (key == 1)
+    Node *parent; // bf가 어긋난 조상들 중 current node랑 가까운 것
+    
+    //key가 1일 때는 삭제
+    if (type == 1)
     {
-        parent = temp;
+        parent = near;
     }
     else
     {
@@ -207,8 +210,6 @@ void rotate(Node **tree, Node *current, int key, Node *temp)
     }
     else
     {
-        //current는 최근 추가된 노드
-        //cout << "/// present : " << current->key << ", near : " << parent->key << " /// ";
         Node *lSubNode = parent->left;
         Node *rSubNode = parent->right;
 
