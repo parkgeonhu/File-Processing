@@ -6,6 +6,7 @@ jobs:
     name: TEST & BUILD
     runs-on: ubuntu-latest
     steps:
-      - name: Echo the greeting's time
-      - run: g++ avl.cpp -o avl
-      - run: .\avl
+      - name: AVL tree TEST
+        run: |
+          g++ avl.cpp -o avl
+          .\avl
