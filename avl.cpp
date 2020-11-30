@@ -459,38 +459,38 @@ void testEntire()
 
     for (int i = 0; i < 20; i++)
     {
-        printf("%d ", testcase[i]);
+        cout<<testcase[i]<<" ";
         insertAVL(&tree, testcase[i]);
         cout<<" : ";
         inorderAVL(tree);
-        printf("\n");
+        cout<<endl;
     }
     for (int i = 0; i < 20; i++)
     {
-        printf("%d ", testcase[i]);
+        cout<<testcase[i]<<" ";
         deleteAVL(&tree, testcase[i]);
         cout<<" : ";
         inorderAVL(tree);
-        printf("\n");
+        cout<<endl;
     }
 
     tree = nullptr;
 
     for (int i = 0; i < 20; i++)
     {
-        printf("%d ", testcase[i]);
+        cout<<testcase[i]<<" ";
         insertAVL(&tree, testcase[i]);
         cout<<" : ";
         inorderAVL(tree);
-        printf("\n");
+        cout<<endl;
     }
     for (int i = 19; i >= 0; i--)
     {
-        printf("%d ", testcase[i]);
+        cout<<testcase[i]<<" ";
         deleteAVL(&tree, testcase[i]);
         cout<<" : ";
         inorderAVL(tree);
-        printf("\n");
+        cout<<endl;
     }
 }
 
