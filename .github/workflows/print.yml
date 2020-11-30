@@ -8,5 +8,6 @@ jobs:
     steps:
       - name: AVL tree TEST
         run: |
+          ls
           g++ avl.cpp -o avl
           .\avl
